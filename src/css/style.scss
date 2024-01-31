@@ -1,0 +1,31 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap');
+
+@mixin flex {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+* {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+
+main .container {
+    @include flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100vw;
+
+    .node {
+        @include flex;
+
+        aspect-ratio: 1;
+        background: rgb(200, 200, 200);
+        border-radius: 100px;
+        height: 100px;
+        position: absolute;
+    }
+}
