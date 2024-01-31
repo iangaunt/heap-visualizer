@@ -33386,10 +33386,121 @@ if (false) {} else {
 
 /***/ }),
 
-/***/ "./src/scripts/Node.tsx":
+/***/ "./src/scripts/Heap.tsx":
 /*!******************************!*\
-  !*** ./src/scripts/Node.tsx ***!
+  !*** ./src/scripts/Heap.tsx ***!
   \******************************/
+/***/ ((__unused_webpack_module, exports) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var Heap = /** @class */ (function () {
+    /**
+     * Creates a new Heap sorter with a specified maximum height
+     * to prevent overflow.
+     *
+     * @param maxHeight - The maximum height a node in the tree can be.
+     */
+    function Heap(maxHeight) {
+        this.maxHeight = maxHeight;
+    }
+    /**
+     * Returns the left child of a specified node.
+     *
+     * @param height - The height of the input node.
+     * @param pos - The position of the input node on its row.
+     * @returns - The HTML element of its left child.
+     */
+    Heap.prototype.getLeftChild = function (height, pos) {
+        return document.getElementById(height + 1 + "-" + (2 * pos - 1));
+    };
+    /**
+     * Returns the right child of a specified node.
+     *
+     * @param height - The height of the input node.
+     * @param pos - The position of the input node on its row.
+     * @returns - The HTML element of its right child.
+     */
+    Heap.prototype.getRightChild = function (height, pos) {
+        return document.getElementById(height + 1 + "-" + (2 * pos));
+    };
+    /**
+     * Fetches the current value stored in a Node in its `h1` element.
+     *
+     * @param element - The node to fetch from.
+     * @returns - The integer value stored in the node.
+     */
+    Heap.prototype.getValue = function (element) {
+        return parseInt(element.getElementsByTagName("h1")[0].innerHTML);
+    };
+    /**
+     * Swaps the two values stored in two nodes.
+     *
+     * @param one - The first node to swap.
+     * @param two - The second node to swap.
+     */
+    Heap.prototype.swapElementValues = function (one, two) {
+        var temp = this.getValue(one);
+        one.getElementsByTagName("h1")[0].innerHTML = two.getElementsByTagName("h1")[0].innerHTML;
+        two.getElementsByTagName("h1")[0].innerHTML = temp.toString();
+    };
+    /**
+    * Swaps the two colors of two nodes.
+    *
+    * @param one - The first node to swap.
+    * @param two - The second node to swap.
+    */
+    Heap.prototype.swapColors = function (one, two) {
+        var temp = one.style.backgroundColor;
+        one.style.backgroundColor = two.style.backgroundColor;
+        two.style.backgroundColor = temp;
+    };
+    /**
+     * Heapifies a node and its children by placing the node with the
+     * largest value on top. Used recursively in order to properly
+     * construct a heap out of the input tree.
+     *
+     * @param height - The height of the node.
+     * @param pos - The position of the node in its respective row.
+     */
+    Heap.prototype.heapify = function (height, pos) {
+        if (height == this.maxHeight)
+            return;
+        var elem = document.getElementById(height + "-" + pos);
+        var value = this.getValue(elem);
+        var left = this.getLeftChild(height, pos);
+        var leftValue = this.getValue(left);
+        var right = this.getRightChild(height, pos);
+        var rightValue = this.getValue(right);
+        var largest = value;
+        if (leftValue > largest)
+            largest = leftValue;
+        if (rightValue > largest)
+            largest = rightValue;
+        if (largest != value) {
+            if (largest == leftValue) {
+                this.swapElementValues(left, elem);
+                this.swapColors(left, elem);
+                this.heapify(parseInt(left.id.substring(0, left.id.indexOf("-"))), parseInt(left.id.substring(left.id.indexOf("-") + 1)));
+            }
+            else if (largest == rightValue) {
+                this.swapElementValues(right, elem);
+                this.swapColors(left, elem);
+                this.heapify(parseInt(right.id.substring(0, left.id.indexOf("-"))), parseInt(right.id.substring(left.id.indexOf("-") + 1)));
+            }
+        }
+    };
+    return Heap;
+}());
+exports["default"] = Heap;
+
+
+/***/ }),
+
+/***/ "./src/scripts/components/Node.tsx":
+/*!*****************************************!*\
+  !*** ./src/scripts/components/Node.tsx ***!
+  \*****************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -33445,10 +33556,10 @@ exports["default"] = Node;
 
 /***/ }),
 
-/***/ "./src/scripts/Tree.tsx":
-/*!******************************!*\
-  !*** ./src/scripts/Tree.tsx ***!
-  \******************************/
+/***/ "./src/scripts/components/Tree.tsx":
+/*!*****************************************!*\
+  !*** ./src/scripts/components/Tree.tsx ***!
+  \*****************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
 
 
@@ -33457,7 +33568,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var react_1 = __importDefault(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
-var Node_1 = __importDefault(__webpack_require__(/*! ./Node */ "./src/scripts/Node.tsx"));
+var Node_1 = __importDefault(__webpack_require__(/*! ./Node */ "./src/scripts/components/Node.tsx"));
 function Tree(props) {
     var nodes = [];
     for (var i = 1; i <= props.height; i++) {
@@ -33486,80 +33597,26 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 __webpack_require__(/*! ../css/style.css */ "./src/css/style.css");
 var react_1 = __importDefault(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 var client_1 = __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js");
-var Tree_1 = __importDefault(__webpack_require__(/*! ./Tree */ "./src/scripts/Tree.tsx"));
-var main = document.getElementById("main");
+var Heap_1 = __importDefault(__webpack_require__(/*! ./Heap */ "./src/scripts/Heap.tsx"));
+var Tree_1 = __importDefault(__webpack_require__(/*! ./components/Tree */ "./src/scripts/components/Tree.tsx"));
 var HEIGHT = 6;
-var root = (0, client_1.createRoot)(main);
+var root = (0, client_1.createRoot)(document.getElementById("main"));
 root.render(react_1.default.createElement(Tree_1.default, { height: HEIGHT }));
-function getParent(height, pos) {
-    var parentHeight = height - 1;
-    var parentPos = Math.ceil((pos / Math.pow(2, height)) * Math.pow(2, height - 1));
-    return document.getElementById(parentHeight + "-" + parentPos);
-}
-function getLeftChild(height, pos) {
-    return document.getElementById(height + 1 + "-" + (2 * pos - 1));
-}
-function getRightChild(height, pos) {
-    return document.getElementById(height + 1 + "-" + (2 * pos));
-}
-function getValue(height, pos) {
-    return parseInt(document.getElementById(height + "-" + pos).getElementsByTagName("h1")[0].innerHTML);
-}
-function getElemValue(element) {
-    return parseInt(element.getElementsByTagName("h1")[0].innerHTML);
-}
-function swapElementValues(one, two) {
-    var temp = getElemValue(one);
-    one.getElementsByTagName("h1")[0].innerHTML = two.getElementsByTagName("h1")[0].innerHTML;
-    two.getElementsByTagName("h1")[0].innerHTML = temp.toString();
-}
-function swapColors(one, two) {
-    var temp = one.style.backgroundColor;
-    one.style.backgroundColor = two.style.backgroundColor;
-    two.style.backgroundColor = temp;
-}
-function heapify(height, pos) {
-    if (height == HEIGHT)
-        return;
-    console.log(height + "-" + pos);
-    console.log(document.getElementById(height + "-" + pos));
-    var elem = document.getElementById(height + "-" + pos);
-    var value = getElemValue(elem);
-    var left = getLeftChild(height, pos);
-    var leftValue = getElemValue(left);
-    var right = getRightChild(height, pos);
-    var rightValue = getElemValue(right);
-    var largest = value;
-    if (leftValue > largest)
-        largest = leftValue;
-    if (rightValue > largest)
-        largest = rightValue;
-    if (largest != value) {
-        if (largest == leftValue) {
-            swapElementValues(left, elem);
-            swapColors(left, elem);
-            heapify(parseInt(left.id.substring(0, left.id.indexOf("-"))), parseInt(left.id.substring(left.id.indexOf("-") + 1)));
-        }
-        else if (largest == rightValue) {
-            swapElementValues(right, elem);
-            swapColors(left, elem);
-            heapify(parseInt(right.id.substring(0, left.id.indexOf("-"))), parseInt(right.id.substring(left.id.indexOf("-") + 1)));
-        }
-    }
-}
 var delay = 10;
+var heap = new Heap_1.default(HEIGHT);
 function buildHeap() {
     var startingHeight = HEIGHT - 1;
     var _loop_1 = function (i) {
         var _loop_2 = function (j) {
             setTimeout(function () {
-                heapify(i, j);
+                heap.heapify(i, j);
             }, delay * 150);
             delay++;
         };
         for (var j = Math.pow(2, i - 1); j > 0; j--) {
             _loop_2(j);
         }
+        i;
     };
     for (var i = startingHeight; i > 0; i--) {
         _loop_1(i);
