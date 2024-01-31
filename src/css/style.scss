@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap');
+@import "https://fonts.googleapis.com/css2?family=Poppins:wght@200&display=swap";
 
 @mixin flex {
     display: flex;
@@ -7,25 +7,73 @@
 }
 
 * {
-    font-family: 'Poppins', sans-serif;
+    font-family: "Poppins", sans-serif;
     margin: 0;
     padding: 0;
     text-align: center;
 }
 
-main .container {
+main {
     @include flex;
-    flex-direction: column;
     height: 100vh;
     width: 100vw;
 
-    .node {
+    .container {
         @include flex;
+        flex-direction: column;
+        height: 100vh;
+        width: 100vw;
+    
+        .node {
+            @include flex;
+            aspect-ratio: 1;
+            background: rgb(200, 200, 200);
+            border-radius: 100px;
+            height: 100px;
+            position: absolute;
+        }
+    }
+}
 
-        aspect-ratio: 1;
-        background: rgb(200, 200, 200);
-        border-radius: 100px;
-        height: 100px;
-        position: absolute;
+#editor {
+    @include flex;
+    aspect-ratio: 2;
+    border: 1px solid rgb(100, 100, 100);
+    border-radius: 10px;
+    height: 20%;
+    right: 20px;
+    position: fixed;
+    top: 20px;
+
+    .container {
+        @include flex;
+        flex-direction: column;
+        width: 80%;
+
+        button, div {
+            margin: 2px;
+        }
+        
+        div {
+            @include flex;
+            width: 80%;
+
+            p {
+                width: 60%;
+            }
+
+            input {
+                margin: 5px;
+            }
+        }
+
+        p a {
+            color: rgb(48, 70, 212);
+            text-decoration: none;
+
+            &:hover {
+                text-decoration: underline;
+            }
+        }
     }
 }

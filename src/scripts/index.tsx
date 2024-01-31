@@ -2,30 +2,24 @@ import "../css/style.css";
 
 import React from "react";
 import { createRoot } from "react-dom/client";
-import { Icon } from '@iconify/react';
 
+import Editor from "./components/Editor"
 import Heap from "./Heap"
 import Tree from "./components/Tree";
 
-const HEIGHT = 6;
+const treeRoot = createRoot(document.getElementById("main"));
+const editorRoot = createRoot(document.getElementById("editor"));
+editorRoot.render(<Editor />);
 
-const root = createRoot(document.getElementById("main"));
-root.render(<Tree height={HEIGHT}/>);
+document.body.addEventListener("keydown", (e: KeyboardEvent) => {
+    const heightInput: HTMLInputElement = document.getElementById("height-input") as HTMLInputElement;
+    const delayInput: HTMLInputElement = document.getElementById("delay-input") as HTMLInputElement;
 
-let delay = 10;
-let heap: Heap = new Heap(HEIGHT);
+    const HEIGHT = parseInt(heightInput.value);
+    const DELAY = parseInt(delayInput.value);
 
-function buildHeap() {
-    let startingHeight = HEIGHT - 1;
-
-    for (let i = startingHeight; i > 0; i--) {
-        for (let j = Math.pow(2, i - 1); j > 0; j--) {
-            setTimeout(() => {
-                heap.heapify(i, j);
-            }, delay * 150)
-            delay++;
-        }i
+    if (e.key == "r") {
+        treeRoot.render(<Tree height={HEIGHT} />);
+        Heap.buildHeap(HEIGHT, DELAY);
     }
-}
-
-buildHeap();
+});
