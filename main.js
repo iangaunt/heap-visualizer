@@ -33395,15 +33395,20 @@ if (false) {} else {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var Heap = /** @class */ (function () {
-    /**
-     * Creates a new Heap sorter with a specified maximum height
-     * to prevent overflow.
-     *
-     * @param maxHeight - The maximum height a node in the tree can be.
-     */
-    function Heap(maxHeight) {
-        this.maxHeight = maxHeight;
+    function Heap() {
     }
+    /**
+     * Returns the parent element of a specified node.
+     *
+     * @param height - The height of the input node.
+     * @param pos - The position of the input node on its row.
+     * @returns - The HTML element of its parent.
+     */
+    Heap.getParent = function (height, pos) {
+        var parentHeight = height - 1;
+        var parentPos = Math.ceil((pos / Math.pow(2, height)) * Math.pow(2, height - 1));
+        return document.getElementById(parentHeight + "-" + parentPos);
+    };
     /**
      * Returns the left child of a specified node.
      *
@@ -33411,7 +33416,7 @@ var Heap = /** @class */ (function () {
      * @param pos - The position of the input node on its row.
      * @returns - The HTML element of its left child.
      */
-    Heap.prototype.getLeftChild = function (height, pos) {
+    Heap.getLeftChild = function (height, pos) {
         return document.getElementById(height + 1 + "-" + (2 * pos - 1));
     };
     /**
@@ -33421,7 +33426,7 @@ var Heap = /** @class */ (function () {
      * @param pos - The position of the input node on its row.
      * @returns - The HTML element of its right child.
      */
-    Heap.prototype.getRightChild = function (height, pos) {
+    Heap.getRightChild = function (height, pos) {
         return document.getElementById(height + 1 + "-" + (2 * pos));
     };
     /**
@@ -33430,7 +33435,7 @@ var Heap = /** @class */ (function () {
      * @param element - The node to fetch from.
      * @returns - The integer value stored in the node.
      */
-    Heap.prototype.getValue = function (element) {
+    Heap.getValue = function (element) {
         return parseInt(element.getElementsByTagName("h1")[0].innerHTML);
     };
     /**
@@ -33439,7 +33444,7 @@ var Heap = /** @class */ (function () {
      * @param one - The first node to swap.
      * @param two - The second node to swap.
      */
-    Heap.prototype.swapElementValues = function (one, two) {
+    Heap.swapElementValues = function (one, two) {
         var temp = this.getValue(one);
         one.getElementsByTagName("h1")[0].innerHTML = two.getElementsByTagName("h1")[0].innerHTML;
         two.getElementsByTagName("h1")[0].innerHTML = temp.toString();
@@ -33450,10 +33455,46 @@ var Heap = /** @class */ (function () {
     * @param one - The first node to swap.
     * @param two - The second node to swap.
     */
-    Heap.prototype.swapColors = function (one, two) {
+    Heap.swapColors = function (one, two) {
         var temp = one.style.backgroundColor;
         one.style.backgroundColor = two.style.backgroundColor;
         two.style.backgroundColor = temp;
+    };
+    /**
+     * Highlights the parent element and child element of a passed in
+     * node. This allows for easy traversal of the heap in a visual way,
+     * as lines are difficult to add between nodes without canvas lines.
+     *
+     * @param height - The height of the input node.
+     * @param pos - The position of the input node in its respective node.
+     * @param maxHeight - The maximum height of the tree.
+     * @param pCol - The color to highlight the parent of the input node.
+     * @param cCol - The color to highlight the children of the input node.
+     */
+    Heap.highlightFamily = function (height, pos, maxHeight, pCol, cCol) {
+        if (height != 1) {
+            var parent_1 = this.getParent(height, pos);
+            parent_1.style.backgroundColor = pCol;
+        }
+        if (height != maxHeight) {
+            var leftChild = this.getLeftChild(height, pos);
+            var rightChild = this.getRightChild(height, pos);
+            leftChild.style.backgroundColor = cCol;
+            rightChild.style.backgroundColor = cCol;
+        }
+    };
+    /**
+     * Heaps down dependng on the `downElem` node. This will help the tree
+     * be sorted properly in the `heapify` function.
+     *
+     * @param downElem - The element to heap down.
+     * @param currElem - The current element being observed. Will not be heaped further.
+     * @param maxHeight - The maximum height of the tree.
+     */
+    Heap.heapDown = function (downElem, currElem, maxHeight) {
+        this.swapElementValues(downElem, currElem);
+        this.swapColors(downElem, currElem);
+        this.heapify(parseInt(downElem.id.substring(0, downElem.id.indexOf("-"))), parseInt(downElem.id.substring(downElem.id.indexOf("-") + 1)), maxHeight);
     };
     /**
      * Heapifies a node and its children by placing the node with the
@@ -33463,8 +33504,8 @@ var Heap = /** @class */ (function () {
      * @param height - The height of the node.
      * @param pos - The position of the node in its respective row.
      */
-    Heap.prototype.heapify = function (height, pos) {
-        if (height == this.maxHeight)
+    Heap.heapify = function (height, pos, maxHeight) {
+        if (height == maxHeight)
             return;
         var elem = document.getElementById(height + "-" + pos);
         var value = this.getValue(elem);
@@ -33479,20 +33520,73 @@ var Heap = /** @class */ (function () {
             largest = rightValue;
         if (largest != value) {
             if (largest == leftValue) {
-                this.swapElementValues(left, elem);
-                this.swapColors(left, elem);
-                this.heapify(parseInt(left.id.substring(0, left.id.indexOf("-"))), parseInt(left.id.substring(left.id.indexOf("-") + 1)));
+                this.heapDown(left, elem, maxHeight);
             }
             else if (largest == rightValue) {
-                this.swapElementValues(right, elem);
-                this.swapColors(left, elem);
-                this.heapify(parseInt(right.id.substring(0, left.id.indexOf("-"))), parseInt(right.id.substring(left.id.indexOf("-") + 1)));
+                this.heapDown(right, elem, maxHeight);
             }
+        }
+    };
+    /**
+     * Constructs a heap out of the currently rendered tree.
+     *
+     * @param maxHeight - The maximum height of the heap.
+     */
+    Heap.buildHeap = function (height, delay) {
+        var startingHeight = height - 1;
+        var f = 10;
+        var _loop_1 = function (i) {
+            var _loop_2 = function (j) {
+                setTimeout(function () {
+                    Heap.heapify(i, j, height);
+                }, delay * f);
+                f++;
+            };
+            for (var j = Math.pow(2, i - 1); j > 0; j--) {
+                _loop_2(j);
+            }
+        };
+        for (var i = startingHeight; i > 0; i--) {
+            _loop_1(i);
         }
     };
     return Heap;
 }());
 exports["default"] = Heap;
+
+
+/***/ }),
+
+/***/ "./src/scripts/components/Editor.tsx":
+/*!*******************************************!*\
+  !*** ./src/scripts/components/Editor.tsx ***!
+  \*******************************************/
+/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+var react_1 = __importDefault(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
+function Editor() {
+    return (react_1.default.createElement("div", { className: "container" },
+        react_1.default.createElement("div", { className: "height-editor" },
+            react_1.default.createElement("p", null, "Height:"),
+            react_1.default.createElement("input", { id: "height-input", min: "1", max: "6", type: "number" })),
+        react_1.default.createElement("div", { className: "delay-editor" },
+            react_1.default.createElement("p", null, "Delay (ms):"),
+            react_1.default.createElement("input", { id: "delay-input", min: "0", max: "500", type: "number" })),
+        react_1.default.createElement("p", null,
+            "Press ",
+            react_1.default.createElement("b", null, "R"),
+            " to start a sort."),
+        react_1.default.createElement("p", null,
+            "Built by ",
+            react_1.default.createElement("a", { rel: "noreferrer", target: "_blank", href: "https://github.com/iangaunt" }, "@iangaunt"),
+            ".")));
+}
+exports["default"] = Editor;
 
 
 /***/ }),
@@ -33509,45 +33603,23 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 var react_1 = __importDefault(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
-function getParent(height, pos) {
-    var parentHeight = height - 1;
-    var parentPos = Math.ceil((pos / Math.pow(2, height)) * Math.pow(2, height - 1));
-    return document.getElementById(parentHeight + "-" + parentPos);
-}
-function getLeftChild(height, pos) {
-    return document.getElementById(height + 1 + "-" + (2 * pos - 1));
-}
-function getRightChild(height, pos) {
-    return document.getElementById(height + 1 + "-" + (2 * pos));
-}
-function highlightFamily(height, pos, maxHeight, pCol, cCol) {
-    if (height != 1) {
-        var parent_1 = getParent(height, pos);
-        parent_1.style.backgroundColor = pCol;
-    }
-    if (height != maxHeight) {
-        var leftChild = getLeftChild(height, pos);
-        var rightChild = getRightChild(height, pos);
-        leftChild.style.backgroundColor = cCol;
-        rightChild.style.backgroundColor = cCol;
-    }
-}
+var Heap_1 = __importDefault(__webpack_require__(/*! ../Heap */ "./src/scripts/Heap.tsx"));
 function Node(props) {
     var nodeHeight = 100 - props.height * 10 - 10;
     var nodeColor = 150 + props.height * 20;
     var nodeStyle = {
         backgroundColor: "rgb(" + nodeColor + ", " + nodeColor + ", " + nodeColor + ")",
         fontSize: nodeHeight / 6,
-        top: props.height * 110 - 25 * props.height,
-        left: 250 + (1000 / Math.pow(2, props.height)) * (2 * props.pos - 1) - nodeHeight / 2,
+        top: ((screen.height - 95 * props.maxHeight - 10) / 2 - nodeHeight) + props.height * 85 - (100 - nodeHeight),
+        left: ((screen.width - 1000) / 2) + (1000 / Math.pow(2, props.height)) * (2 * props.pos - 1) - nodeHeight / 2,
         height: nodeHeight
     };
     var parentBackgroundColor = "rgb(" + (nodeColor - 20) + ", " + (nodeColor - 20) + ", " + (nodeColor - 20) + ")";
     var childBackgroundColor = "rgb(" + (nodeColor + 20) + ", " + (nodeColor + 20) + ", " + (nodeColor + 20) + ")";
     return (react_1.default.createElement("div", { className: "node", style: nodeStyle, id: props.id, onMouseEnter: function () {
-            highlightFamily(props.height, props.pos, props.maxHeight, "red", "rgb(0, 255, 0)");
+            Heap_1.default.highlightFamily(props.height, props.pos, props.maxHeight, "red", "rgb(0, 255, 0)");
         }, onMouseLeave: function () {
-            highlightFamily(props.height, props.pos, props.maxHeight, parentBackgroundColor, childBackgroundColor);
+            Heap_1.default.highlightFamily(props.height, props.pos, props.maxHeight, parentBackgroundColor, childBackgroundColor);
         } },
         react_1.default.createElement("h1", null, props.data)));
 }
@@ -33597,32 +33669,22 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 __webpack_require__(/*! ../css/style.css */ "./src/css/style.css");
 var react_1 = __importDefault(__webpack_require__(/*! react */ "./node_modules/react/index.js"));
 var client_1 = __webpack_require__(/*! react-dom/client */ "./node_modules/react-dom/client.js");
+var Editor_1 = __importDefault(__webpack_require__(/*! ./components/Editor */ "./src/scripts/components/Editor.tsx"));
 var Heap_1 = __importDefault(__webpack_require__(/*! ./Heap */ "./src/scripts/Heap.tsx"));
 var Tree_1 = __importDefault(__webpack_require__(/*! ./components/Tree */ "./src/scripts/components/Tree.tsx"));
-var HEIGHT = 6;
-var root = (0, client_1.createRoot)(document.getElementById("main"));
-root.render(react_1.default.createElement(Tree_1.default, { height: HEIGHT }));
-var delay = 10;
-var heap = new Heap_1.default(HEIGHT);
-function buildHeap() {
-    var startingHeight = HEIGHT - 1;
-    var _loop_1 = function (i) {
-        var _loop_2 = function (j) {
-            setTimeout(function () {
-                heap.heapify(i, j);
-            }, delay * 150);
-            delay++;
-        };
-        for (var j = Math.pow(2, i - 1); j > 0; j--) {
-            _loop_2(j);
-        }
-        i;
-    };
-    for (var i = startingHeight; i > 0; i--) {
-        _loop_1(i);
+var treeRoot = (0, client_1.createRoot)(document.getElementById("main"));
+var editorRoot = (0, client_1.createRoot)(document.getElementById("editor"));
+editorRoot.render(react_1.default.createElement(Editor_1.default, null));
+document.body.addEventListener("keydown", function (e) {
+    var heightInput = document.getElementById("height-input");
+    var delayInput = document.getElementById("delay-input");
+    var HEIGHT = parseInt(heightInput.value);
+    var DELAY = parseInt(delayInput.value);
+    if (e.key == "r") {
+        treeRoot.render(react_1.default.createElement(Tree_1.default, { height: HEIGHT }));
+        Heap_1.default.buildHeap(HEIGHT, DELAY);
     }
-}
-buildHeap();
+});
 
 
 /***/ })
